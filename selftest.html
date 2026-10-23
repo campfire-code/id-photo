@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8" /><title>证件照自检（开发用）</title></head>
+<body><pre id="out">running</pre><div id="imgs"></div><script type="module">
+import { makeIdPhoto } from '/src/tool/photo.ts';
+// 合成一张「示例人像」（几何卡通，不是真人）：杂色室内背景上的头肩像
+function portrait(W = 900, H = 1200, dx = 0) {
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  const grd = g.createLinearGradient(0, 0, W, H); grd.addColorStop(0, '#b9b2a4'); grd.addColorStop(1, '#7d8a78');
+  g.fillStyle = grd; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 60; i++) { g.fillStyle = `hsla(${(i * 47) % 360},25%,${45 + (i % 5) * 6}%,.35)`; g.fillRect((i * 131) % W, (i * 71) % H, 90, 60); }
+  const cx = W / 2 + dx;
+  // 衣服与肩膀
+  g.fillStyle = '#2f3e5c'; g.beginPath(); g.moveTo(cx - 330, H); g.quadraticCurveTo(cx - 320, 820, cx - 90, 780); g.lineTo(cx + 90, 780); g.quadraticCurveTo(cx + 320, 820, cx + 330, H); g.closePath(); g.fill();
+  g.fillStyle = '#f1f1f1'; g.beginPath(); g.moveTo(cx - 70, 780); g.lineTo(cx, 900); g.lineTo(cx + 70, 780); g.closePath(); g.fill();
+  // 脖子
+  g.fillStyle = '#d9a383'; g.fillRect(cx - 60, 640, 120, 160);
+  // 脸
+  g.fillStyle = '#e8b896'; g.beginPath(); g.ellipse(cx, 500, 150, 190, 0, 0, Math.PI * 2); g.fill();
+  // 耳朵
+  g.beginPath(); g.ellipse(cx - 150, 510, 24, 40, 0, 0, Math.PI * 2); g.ellipse(cx + 150, 510, 24, 40, 0, 0, Math.PI * 2); g.fill();
+  // 头发
+  g.fillStyle = '#2a211c'; g.beginPath(); g.ellipse(cx, 400, 165, 120, 0, Math.PI, 0); g.fill(); g.fillRect(cx - 165, 395, 30, 90); g.fillRect(cx + 135, 395, 30, 90);
+  // 五官
+  g.fillStyle = '#2a211c'; g.beginPath(); g.ellipse(cx - 55, 500, 14, 10, 0, 0, Math.PI * 2); g.ellipse(cx + 55, 500, 14, 10, 0, 0, Math.PI * 2); g.fill();
+  g.fillRect(cx - 80, 465, 50, 7); g.fillRect(cx + 30, 465, 50, 7);
+  g.strokeStyle = '#b07a5e'; g.lineWidth = 5; g.beginPath(); g.moveTo(cx, 520); g.lineTo(cx - 10, 570); g.lineTo(cx + 8, 572); g.stroke();
+  g.strokeStyle = '#a5524a'; g.lineWidth = 7; g.beginPath(); g.arc(cx, 590, 40, 0.2 * Math.PI, 0.8 * Math.PI); g.stroke();
+  return c;
+}
+window.portrait = portrait;
+const res = [];
+const toBytes = async (c, t = 'image/jpeg') => new Uint8Array(await (await new Promise((r) => c.toBlob(r, t, 0.92))).arrayBuffer());
+const src = await toBytes(portrait());
+const t0 = performance.now();
+for (const [bg, w, h, sheet] of [['#628BCE', 295, 413, true], ['#FFFFFF', 413, 626, true], ['#D74532', 600, 600, false]]) {
+  const r = await makeIdPhoto(src, { size: { w, h }, background: bg, headRatio: 0.52, topMargin: 0.11, sheet, cropLines: true });
+  const dims = async (b) => { const im = new Image(); im.src = URL.createObjectURL(new Blob([b])); await im.decode(); document.getElementById('imgs').append(im); im.style.cssText = 'max-width:420px;border:1px solid #ccc;margin:4px'; return `${im.naturalWidth}x${im.naturalHeight}`; };
+  res.push(`${bg} 单张=${await dims(r.photo)} dpi字节=${Array.from(r.photo.slice(13, 18)).join(',')} 排版=${r.sheet ? await dims(r.sheet) : '无'} 张数=${r.count} 头=${JSON.stringify(r.head)} 裁剪=${JSON.stringify(r.crop, (k, v) => typeof v === 'number' ? Math.round(v) : v)}`);
+}
+const off = await makeIdPhoto(await toBytes(portrait(1200, 1200, 160)), { size: { w: 295, h: 413 }, background: '#628BCE', headRatio: 0.52, topMargin: 0.11, sheet: false, cropLines: false });
+{ const im = new Image(); im.src = URL.createObjectURL(new Blob([off.photo])); im.style.cssText = 'width:200px;border:1px solid #ccc'; document.getElementById('imgs').append(im); }
+res.push(`偏右人像：头中心=${Math.round(off.head.cx)}（画的是 760） 裁剪=${JSON.stringify(off.crop, (k, v) => typeof v === 'number' ? Math.round(v) : v)}`);
+res.push(`耗时 ${Math.round(performance.now() - t0)}ms`);
+try { await makeIdPhoto(new Uint8Array([1, 2, 3]), { size: { w: 295, h: 413 }, background: '#fff', headRatio: 0.5, topMargin: 0.1, sheet: false, cropLines: false }); } catch (e) { res.push('损坏图片：' + e.message); }
+// 纯背景（没有人）
+const empty = document.createElement('canvas'); empty.width = 600; empty.height = 800; const eg = empty.getContext('2d'); eg.fillStyle = '#d0d4d8'; eg.fillRect(0, 0, 600, 800);
+try { await makeIdPhoto(await toBytes(empty), { size: { w: 295, h: 413 }, background: '#fff', headRatio: 0.5, topMargin: 0.1, sheet: false, cropLines: false }); res.push('纯背景：没有报错'); } catch (e) { res.push('纯背景：' + e.message); }
+window.sampleJpeg = Array.from(src);
+document.getElementById('out').textContent = res.join('\n');
+</script></body></html>
