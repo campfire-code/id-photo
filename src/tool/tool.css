@@ -1,0 +1,29 @@
+/* 证件照换底排版：原照片 → 证件照 → 6 寸相纸，三段对照；只用 kit.css 变量 */
+.ip-empty { display: grid; justify-items: center; gap: 12px; padding: 18px 12px; max-width: 520px; margin: auto; text-align: center; font-size: 14px; }
+.ip-empty > svg { width: 100%; max-width: 460px; height: auto; }
+.ip-snap { fill: var(--chip); stroke: var(--line-strong); stroke-width: 1.5; }
+.ip-sun { fill: var(--warn); }
+.ip-frame { stroke: var(--line-strong); stroke-width: 1.2; }
+.ip-paper { fill: #fff; stroke: var(--line-strong); stroke-width: 1.5; }
+.ip-cell { fill: #628BCE; opacity: .85; }
+.ip-arrow { fill: none; stroke: var(--primary); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.ip-arrow.sm { stroke-width: 2.5; }
+.ip-cap { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ip-tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; color: var(--muted); font-size: 13px; }
+.ip-title { margin: 2px 0 0; font-size: 20px; }
+.ip-act { margin: 0; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+
+.ip-res { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; width: 100%; min-width: 0; font-size: 14px; }
+.ip-res figure { margin: 0; display: grid; gap: 4px; min-width: 0; }
+.ip-res figcaption { display: flex; flex-wrap: wrap; line-height: 1.35; align-items: center; gap: 2px 8px; font-size: 13px; color: var(--muted); }
+.ip-res figcaption b { color: var(--ink); font-size: 14px; }
+.ip-src { flex: none; }
+.ip-src img { height: 92px; width: auto; max-width: 72px; object-fit: cover; border-radius: 8px; opacity: .85; display: block; }
+.ip-id img { height: 128px; max-width: 100%; object-fit: cover; width: auto; border-radius: 6px; display: block; box-shadow: 0 0 0 1px var(--line-strong), 0 6px 16px rgba(0,0,0,.14); }
+.ip-id { flex: none; width: 108px; }
+.ip-id figcaption { display: grid; gap: 1px; justify-items: start; }
+.ip-chip { display: inline-flex; align-items: center; gap: 5px; padding: 0 8px; border-radius: 999px; background: var(--chip); color: var(--ink); line-height: 22px; }
+.ip-chip i { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 1px var(--line-strong); display: block; }
+.ip-next { flex: none; color: var(--primary); }
+.ip-sheet { flex: 1 1 0; min-width: 120px; max-width: 260px; }
+.ip-sheet svg { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: 0 0 0 1px var(--line-strong), 0 4px 12px rgba(0,0,0,.12); background: #fff; }

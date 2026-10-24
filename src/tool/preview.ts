@@ -1,5 +1,6 @@
 // 截图与预览用的示例数据（不会进入正式运行）：几何卡通人像，不是真人照片
 import type { Row } from '../kit/runner';
+import type { Stat } from './Result';
 
 function face(bg: string, done: boolean, hair: string, shirt: string) {
   const c = document.createElement('canvas');
@@ -20,13 +21,13 @@ function face(bg: string, done: boolean, hair: string, shirt: string) {
 }
 
 const files: [string, string, string, string, Row['status'], string?][] = [
-  ['示例-员工01.jpg', '#628BCE', '#2a211c', '#2f3e5c', 'ok', '295×413 · 蓝底 · 6 寸排版 10 张'],
-  ['示例-员工02.jpg', '#628BCE', '#5a3b2a', '#6b2f3a', 'ok', '295×413 · 蓝底 · 6 寸排版 10 张'],
-  ['示例-员工03.png', '#628BCE', '#1d1d1d', '#3d5a4a', 'ok', '295×413 · 蓝底 · 6 寸排版 10 张'],
-  ['示例-员工04.jpg', '#628BCE', '#3a2a22', '#454545', 'run'],
-  ['示例-员工05.jpg', '#628BCE', '#2a211c', '#2f3e5c', 'wait'],
-  ['示例-员工06.jpg', '#628BCE', '#6b4a35', '#5a4a7a', 'wait'],
-  ['示例-风景照.jpg', '#628BCE', '#2a211c', '#2f3e5c', 'err', '没有识别到人像，请换一张正面、头肩完整、背景简单的照片'],
+  ['王磊-入职照.jpg', '#628BCE', '#2a211c', '#2f3e5c', 'ok', '295×413 · 蓝底 · 6 寸排版 10 张'],
+  ['李婷-生活照.jpg', '#628BCE', '#5a3b2a', '#6b2f3a', 'ok', '295×413 · 蓝底 · 6 寸排版 10 张'],
+  ['陈浩-自拍.png', '#628BCE', '#1d1d1d', '#3d5a4a', 'ok', '295×413 · 蓝底 · 6 寸排版 10 张'],
+  ['刘洋-工位照.jpg', '#628BCE', '#3a2a22', '#454545', 'run'],
+  ['赵敏-旅行照.jpg', '#628BCE', '#2a211c', '#2f3e5c', 'wait'],
+  ['孙杰-合影截图.jpg', '#628BCE', '#6b4a35', '#5a4a7a', 'wait'],
+  ['西湖风景.jpg', '#628BCE', '#2a211c', '#2f3e5c', 'err', '没有识别到人像，请换一张正面、头肩完整、背景简单的照片'],
 ];
 
 export const rows = (state: string): Row[] =>
@@ -37,6 +38,6 @@ export const rows = (state: string): Row[] =>
       status: st,
       progress: st === 'run' ? 0.6 : st === 'ok' ? 1 : 0,
       error: st === 'err' ? text : undefined,
-      result: st === 'ok' ? { preview: face(bg, true, hair, shirt), outputPath: '/示例', summary: text ?? '295×413 · 蓝底 · 6 寸排版 10 张' } : undefined,
+      result: st === 'ok' ? { preview: face(bg, true, hair, shirt), outputPath: '/示例', summary: text ?? '295×413 · 蓝底 · 6 寸排版 10 张', data: { w: 295, h: 413, bgName: '蓝底', bg, count: 10 } satisfies Stat } : undefined,
     };
   });

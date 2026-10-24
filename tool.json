@@ -2,12 +2,13 @@
   "id": "o14",
   "slug": "id-photo",
   "name": "证件照换底排版",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "repo": "campfire-code/id-photo",
   "license": "MIT",
   "ui": {
     "layout": "e",
-    "palette": "green"
+    "palette": "green",
+    "accent": "#2774B0"
   },
   "upstream": {
     "repo": "Zeyi-Lin/HivisionIDPhotos",

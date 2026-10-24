@@ -35,7 +35,7 @@ export const PAPER = { w: 1800, h: 1200, dpi: 300 };
 /** 像素换算毫米（300 DPI），保留一位小数 */
 export const pxToMm = (px: number, dpi = 300) => Math.round((px / dpi) * 254) / 10;
 
-export const sizeLabel = (s: IdSize) => `${s.name}（${pxToMm(s.w)}×${pxToMm(s.h)} mm）`;
+export const sizeLabel = (s: IdSize) => `${s.name}（${pxToMm(s.w)}×${pxToMm(s.h)} 毫米）`;
 
 /** #RGB / #RRGGBB 校验与补全，不合法返回 null */
 export function normalizeColor(s: string): string | null {
