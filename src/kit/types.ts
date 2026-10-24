@@ -66,6 +66,10 @@ export interface RunContext {
   llm(messages: { role: 'system' | 'user' | 'assistant'; content: string }[], opts?: { json?: boolean; temperature?: number }): Promise<string>;
   /** 调用内置 Python 程序（工具启用 sidecar 时可用），参数为命令行参数，返回标准输出 */
   sidecar(args: string[]): Promise<string>;
+  /** 调用内置 ffmpeg（tool.json 写 "ffmpeg": true 时可用）；onTime 收到已处理秒数 */
+  ffmpeg(args: string[], onTime?: (seconds: number) => void): Promise<void>;
+  /** 读取音视频时长（秒），需要内置 ffmpeg */
+  duration(path: string): Promise<number>;
 }
 
 interface ToolBase {
@@ -81,6 +85,10 @@ interface ToolBase {
   icon?: ComponentType<{ size?: number }>;
   /** 结果展示形态 */
   resultView: 'list' | 'table' | 'cards' | 'text';
+  /** 自定义空状态（还没添加内容时），用来讲清这个工具具体做什么；不填用通用的拖放区 */
+  Empty?: ComponentType<{ hover: boolean }>;
+  /** 自定义单条结果的展示（处理成功后），例如前后对比、识别出的文字；不填用通用的缩略图和一行说明 */
+  ResultBody?: ComponentType<{ item: InputItem; result: ItemResult }>;
   /** resultView=table 时的列：[键, 标题] */
   columns?: [string, string][];
   /** 并发数，默认 2 */
@@ -116,7 +124,7 @@ export interface CustomTool extends Omit<ToolBase, 'resultView'> {
   resultView?: never;
   /** 主页面在导航里的名字，默认「主页」 */
   mainLabel?: string;
-  Main: (props: { ctx: Pick<RunContext, 'readFile' | 'readText' | 'writeFile' | 'writeText' | 'mkdir' | 'join' | 'llm' | 'sidecar'> }) => ReactNode;
+  Main: (props: { ctx: Pick<RunContext, 'readFile' | 'readText' | 'writeFile' | 'writeText' | 'mkdir' | 'join' | 'llm' | 'sidecar' | 'ffmpeg' | 'duration'> }) => ReactNode;
 }
 
 export type ToolDef = BatchTool | GenerateTool | CustomTool;
@@ -128,6 +136,7 @@ export interface ToolMeta {
   version: string;
   repo: string;
   license: string;
-  ui: { layout: LayoutId; palette: PaletteId };
+  /** accent：工具自己的主色（#RRGGBB），覆盖 palette 的主色 */
+  ui: { layout: LayoutId; palette: PaletteId; accent?: string };
   upstream?: { repo: string; license: string } | null;
 }

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { InputItem, ItemResult, Params, RunContext, ToolDef } from './types';
 import { chat } from './settings';
-import { defaultOutputDir, ensureDir, ensureParent, expandPaths, fs, runSidecar, settingsStore } from './platform';
+import { defaultOutputDir, ensureDir, ensureParent, expandPaths, fs, mediaDuration, runFfmpeg, runSidecar, settingsStore } from './platform';
 
 export type Status = 'wait' | 'run' | 'ok' | 'err';
 export interface Row {
@@ -97,6 +97,8 @@ export function useToolRunner(tool: ToolDef) {
     join: (...parts) => fs.join(...parts),
     llm: (m, o) => chat(m, { ...o, signal }),
     sidecar: runSidecar,
+    ffmpeg: (args, onTime) => runFfmpeg(args, onTime, signal),
+    duration: mediaDuration,
   });
 
   const start = useCallback(async () => {

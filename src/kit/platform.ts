@@ -75,6 +75,35 @@ export const reveal = (path: string) => revealItemInDir(path);
 export const openLink = (url: string) => openUrl(url);
 export const httpFetch = tauriFetch;
 
+/**
+ * 调用内置的 ffmpeg（工具的 tool.json 里写 "ffmpeg": true 时随应用打包）。
+ * onTime 回调收到已处理到的秒数，用来算进度；失败时抛出带最后几行输出的错误。
+ */
+export async function runFfmpeg(args: string[], onTime?: (seconds: number) => void, signal?: AbortSignal): Promise<void> {
+  const cmd = Command.sidecar('binaries/ffmpeg', ['-hide_banner', '-nostdin', '-y', ...args]);
+  const tail: string[] = [];
+  cmd.stderr.on('data', (line: string) => {
+    tail.push(line);
+    if (tail.length > 12) tail.shift();
+    const m = /time=(\d+):(\d+):(\d+(?:\.\d+)?)/.exec(line);
+    if (m && onTime) onTime(Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]));
+  });
+  const child = await cmd.spawn();
+  const onAbort = () => void child.kill();
+  signal?.addEventListener('abort', onAbort, { once: true });
+  const code = await new Promise<number | null>((resolve) => cmd.on('close', (e) => resolve(e.code)));
+  signal?.removeEventListener('abort', onAbort);
+  if (signal?.aborted) throw new Error('已取消');
+  if (code !== 0) throw new Error(`ffmpeg 处理失败：${tail.filter((l) => l.trim()).slice(-3).join(' / ') || `退出码 ${code}`}`);
+}
+
+/** 读取音视频时长（秒），读不到返回 0 */
+export async function mediaDuration(path: string): Promise<number> {
+  const out = await Command.sidecar('binaries/ffmpeg', ['-hide_banner', '-nostdin', '-i', path]).execute();
+  const m = /Duration: (\d+):(\d+):(\d+(?:\.\d+)?)/.exec(out.stderr);
+  return m ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]) : 0;
+}
+
 export async function runSidecar(args: string[]): Promise<string> {
   const out = await Command.sidecar('binaries/sidecar', args).execute();
   if (out.code !== 0) throw new Error(out.stderr.trim().split('\n').pop() || `内置程序退出码 ${out.code}`);

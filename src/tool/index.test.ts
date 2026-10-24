@@ -17,7 +17,7 @@ function fakeCtx(files: Map<string, Uint8Array>, params: Params): RunContext {
     readFile: async (p) => files.get(p)!, readText: async () => '',
     writeFile: async (p, d) => void files.set(p, d), writeText: async () => {},
     mkdir: async () => {}, join: async (...parts) => parts.join('/'),
-    llm: async () => '', sidecar: async () => '',
+    llm: async () => '', sidecar: async () => '', ffmpeg: async () => {}, duration: async () => 0,
   };
 }
 const defaults = (over: Params = {}): Params => ({ ...Object.fromEntries(tool.params.map((f) => [f.key, f.default])), ...over });
